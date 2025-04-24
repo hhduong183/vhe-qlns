@@ -1,39 +1,25 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { Slot, useRouter, useSegments } from 'expo-router';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
+  const router = useRouter();
+  const segments = useSegments();
+  
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const isLoggedIn = false; // Thay đổi logic này để kiểm tra xem người dùng đã đăng nhập chưa
+    
+    // Nếu segment đầu tiên không phải là (tabs), người dùng đang ở màn hình đăng nhập
+    const isInAuthGroup = segments[0] === '(tabs)';
+
+    if (!isLoggedIn && isInAuthGroup) {
+      // Nếu người dùng chưa đăng nhập nhưng đang cố gắng truy cập màn hình đã xác thực
+      router.replace('/login');
+    } else if (isLoggedIn && !isInAuthGroup) {
+      // Nếu người dùng đã đăng nhập nhưng vẫn ở màn hình đăng nhập
+      router.replace('/(tabs)');
     }
-  }, [loaded]);
+  }, [segments]);
 
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+  return <Slot />;
 }
