@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkAppVersion } from '../utils/versionCheck';
 
 // Create auth context
 const AuthContext = createContext(null);
@@ -23,6 +24,37 @@ function AuthProvider({ children }) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
+        // Kiểm tra phiên bản app trước
+        const versionCheck = await checkAppVersion();
+        
+        if (versionCheck.success && versionCheck.data) {
+          // Nếu bắt buộc cập nhật, chuyển hướng đến màn hình cập nhật
+          if (versionCheck.data.force_update) {
+            router.replace({
+              pathname: '/update-required',
+              params: {
+                storeUrl: versionCheck.data.store_url,
+                forceUpdate: 'true',
+                message: versionCheck.data.message
+              }
+            });
+            setIsLoading(false);
+            return;
+          }
+          // Nếu khuyến nghị cập nhật, hiển thị thông báo nhưng vẫn cho phép sử dụng
+          else if (versionCheck.data.needs_update) {
+            router.push({
+              pathname: '/update-required',
+              params: {
+                storeUrl: versionCheck.data.store_url,
+                forceUpdate: 'false',
+                message: versionCheck.data.message
+              }
+            });
+          }
+        }
+        
+        // Tiếp tục kiểm tra đăng nhập
         const userData = await AsyncStorage.getItem('userData');
         if (userData) {
           setUser(JSON.parse(userData));

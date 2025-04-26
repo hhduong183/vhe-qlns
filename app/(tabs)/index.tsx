@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router'; // Thêm import này
 
 export default function TabIndex() {
   const [weatherData, setWeatherData] = useState(null);
@@ -22,13 +23,37 @@ export default function TabIndex() {
   const [newsLoading, setNewsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState('');
+  const router = useRouter(); // Thêm router hook
   
-  // Fetch all data
+  // Cập nhật hàm fetchUserInfo
+  const fetchUserInfo = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUsername(user.ten_nv || 'Người dùng');
+      } else {
+        // Không tìm thấy dữ liệu người dùng, chuyển hướng đến trang đăng nhập
+        console.log('Không tìm thấy thông tin người dùng, chuyển hướng đến trang đăng nhập');
+        router.replace('/login');
+        return false; // Không có người dùng
+      }
+      return true; // Có người dùng
+    } catch (error) {
+      console.error('Lỗi khi lấy thông tin người dùng:', error);
+      router.replace('/login');
+      return false;
+    }
+  };
+  
+  // Cập nhật hàm fetchAllData
   const fetchAllData = async () => {
+    const hasUser = await fetchUserInfo();
+    if (!hasUser) return; // Dừng lại nếu không có người dùng
+    
     fetchWeather();
     fetchWebsiteNews();
     fetchFacebookPosts();
-    fetchUserInfo();
   };
 
   // Handle pull to refresh
@@ -36,19 +61,6 @@ export default function TabIndex() {
     setRefreshing(true);
     fetchAllData().then(() => setRefreshing(false));
   }, []);
-  
-  // Get user info
-  const fetchUserInfo = async () => {
-    try {
-      const userData = await AsyncStorage.getItem('userData');
-      if (userData) {
-        const user = JSON.parse(userData);
-        setUsername(user.ten_nv || 'Người dùng');
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy thông tin người dùng:', error);
-    }
-  };
   
   // Fetch weather data for Hai Phong
   const fetchWeather = async () => {

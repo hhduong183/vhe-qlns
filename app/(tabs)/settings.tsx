@@ -4,11 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useAuth } from '../_layout';
+import Constants from 'expo-constants'; // Add this import
 
 export default function Settings() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const { setUser } = useAuth();
+  
+  // Get app version from app.json
+  const appVersion = Constants.expoConfig?.version || 'Ôi zồi ôi!'; // Fallback version if not found
 
   // Fetch user info on component mount
   useEffect(() => {
@@ -99,7 +103,7 @@ export default function Settings() {
         <Text style={styles.logoutText}>Đăng xuất</Text>
       </TouchableOpacity>
 
-      <Text style={styles.versionText}>Phiên bản 1.0.0</Text>
+      <Text style={styles.versionText}>Phiên bản {appVersion}</Text>
     </View>
   );
 }
