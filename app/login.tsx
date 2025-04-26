@@ -4,10 +4,15 @@ import { router } from 'expo-router';
 // import * as Linking from 'expo-linking';
 import { TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useAuth } from './_layout';
 
 export default function LoginScreen() {
     const [user_name, setUsername] = useState('');
     const [mat_khau, setPassword] = useState('');
+
+    const router = useRouter();
+    const { setUser } = useAuth();
 
     const handleLogin = async () => {
         if (!user_name || !mat_khau) {
@@ -16,7 +21,7 @@ export default function LoginScreen() {
         }
 
         try {
-            const response = await fetch('https://bakup.vhe.com.vn/api/login_app.php', {
+            const response = await fetch('https://test.vhe.com.vn/api/login_app.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -29,11 +34,16 @@ export default function LoginScreen() {
 
             if (result.success) {
                 // Lưu thông tin người dùng vào AsyncStorage
-                await AsyncStorage.setItem('userData', JSON.stringify({
-                    id: result.id,  // ID người dùng từ API
+                const userData = {
+                    id: result.id,
                     ten_nv: result.ten_nv,
                     // Thông tin khác nếu cần
-                }));
+                };
+                
+                await AsyncStorage.setItem('userData', JSON.stringify(userData));
+                
+                // IMPORTANT: Update the auth context user state
+                setUser(userData);
 
                 Alert.alert('Đăng nhập thành công', `Chào mừng, ${result.ten_nv}!`);
                 router.replace('/(tabs)');
@@ -85,7 +95,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#99ffff',
         padding: 15,
         borderRadius: 8,
-        marginTop: 30,
+        marginTop: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -94,14 +104,18 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-start', // Changed from 'center' to 'flex-start'
         alignItems: 'center',
         padding: 16,
         backgroundColor: '#1d243d',
+        paddingTop: 70, // Added padding at the top
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        justifyContent: 'center',
+        marginTop: 30, // Adjusted margin
+        flexDirection: 'row',
+        marginBottom: 10, // Increased bottom margin
     },
     logo: {
         width: 150,
@@ -114,7 +128,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     input: {
-        width: '100%',
+        width: '70%',
         height: 40,
         borderColor: '#ccc',
         borderWidth: 1,

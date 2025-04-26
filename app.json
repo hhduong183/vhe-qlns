@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "vhe-qlns",
+    "name": "VHE-QLNS",
     "slug": "vhe-qlns",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,17 +9,22 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.vhe.qlns",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         }
-      }
+      },
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.hhduong183.vheqlns",
+      "versionCode": 4
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +45,20 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "38d4a353-0966-4faf-b0bc-8f0589431c0b"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/38d4a353-0966-4faf-b0bc-8f0589431c0b"
     }
   }
 }

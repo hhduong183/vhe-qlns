@@ -84,7 +84,7 @@ export default function LeaveScreen() {
       }
       
       // Gọi API để lấy thông tin ngày phép
-      const response = await fetch(`https://bakup.vhe.com.vn/api/leave_info.php?id=${id}`, {
+      const response = await fetch(`https://test.vhe.com.vn/api/leave_info.php?id=${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function LeaveScreen() {
 
       const formattedDate = format(leaveDate, 'yyyy-MM-dd');
 
-      const response = await fetch('https://bakup.vhe.com.vn/api/request_leave.php', {
+      const response = await fetch('https://test.vhe.com.vn/api/request_leave.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

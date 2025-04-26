@@ -76,7 +76,10 @@ export default function ChangePasswordScreen() {
       // /* COMMENTED OUT: Original API call code
       const authToken = await AsyncStorage.getItem('authToken');
 
-      const response = await fetch('https://bakup.vhe.com.vn/api/change_password.php', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch('https://test.vhe.com.vn/api/change_password.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +90,10 @@ export default function ChangePasswordScreen() {
           current_password: currentPassword,
           new_password: newPassword,
         }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       const responseText = await response.text();
       console.log('Raw response:', responseText.substring(0, 200));
@@ -111,8 +117,13 @@ export default function ChangePasswordScreen() {
       }
       // */
     } catch (error) {
-      console.error('Lỗi khi đổi mật khẩu:', error);
-      Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      if (error.name === 'AbortError') {
+        console.error('Request timed out');
+        Alert.alert('Lỗi', 'Yêu cầu đã hết thời gian. Vui lòng kiểm tra kết nối mạng và thử lại.');
+      } else {
+        console.error('Lỗi khi đổi mật khẩu:', error);
+        Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      }
     } finally {
       setLoading(false);
     }

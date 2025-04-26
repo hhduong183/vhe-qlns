@@ -56,7 +56,7 @@ export default function Profile() {
       
       console.log('Đang gửi yêu cầu đến API với ID:', id);
       
-      const response = await fetch(`https://bakup.vhe.com.vn/api/profile_app.php?id=${id}`, {
+      const response = await fetch(`https://test.vhe.com.vn/api/profile_app.php?id=${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export default function Profile() {
       <View style={styles.profileCard}>
         <View style={styles.profileImageContainer}>
           <Image 
-            source={{ uri: `https://bakup.vhe.com.vn/uploads/staffs/${employeeData.hinh_anh}` }} 
+            source={{ uri: `https://test.vhe.com.vn/uploads/staffs/${employeeData.hinh_anh}` }} 
             style={styles.profileImage}
             defaultSource={require('../../assets/default-avatar.png')}
           />

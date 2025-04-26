@@ -89,7 +89,7 @@ export default function SalaryScreen() {
 
       // Fetch salary data from API
       const response = await fetch(
-        `https://bakup.vhe.com.vn/api/salary_app.php?id=${id}&month=${selectedMonth}&year=${selectedYear}`,
+        `https://test.vhe.com.vn/api/salary_app.php?id=${id}&month=${selectedMonth}&year=${selectedYear}`,
         {
           method: 'GET',
           headers: {
