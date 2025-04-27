@@ -11,12 +11,13 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome } from '@expo/vector-icons';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
+  const { returnTo } = useLocalSearchParams();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -129,6 +130,11 @@ export default function ChangePasswordScreen() {
     }
   };
 
+  const handleBack = () => {
+    // Để Stack Navigator quản lý việc back
+    router.back();
+  };
+
   return (
     <KeyboardAvoidingView 
       style={{ flex: 1 }} 
@@ -136,7 +142,7 @@ export default function ChangePasswordScreen() {
     >
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <FontAwesome name="arrow-left" size={20} color="#333" />
           </TouchableOpacity>
           <Text style={styles.title}>Đổi mật khẩu</Text>

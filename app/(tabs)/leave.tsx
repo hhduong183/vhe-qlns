@@ -303,7 +303,8 @@ export default function LeaveScreen() {
                         // Nếu muốn tự động đóng sau khi chọn
                         // setShowTypePicker(false);
                       }}
-                      style={{height: 215}}
+                      itemStyle={{ color: '#000000' }} // Chỉnh màu chữ ở đây
+                      style={{height: 215 }}
                     >
                       <Picker.Item label="-- Chọn loại ngày nghỉ --" value="" />
                       <Picker.Item label="Nghỉ phép năm" value="Nghỉ phép năm" />

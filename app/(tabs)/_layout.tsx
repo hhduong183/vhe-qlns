@@ -2,6 +2,13 @@ import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof FontAwesome>['name'];
+  color: string;
+}) {
+  return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />;
+}
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -54,12 +61,16 @@ export default function TabLayout() {
         options={{
           title: 'Cài đặt',
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          // Điều này quan trọng - cho phép hiển thị header được kế thừa từ Stack
+          headerShown: false,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            // Khi tab được nhấn, đảm bảo rằng chúng ta quay lại root của stack
+            navigation.navigate('settings', { screen: 'index' });
+          },
+        })}
       />
     </Tabs>
   );
-}
-
-function TabBarIcon(props) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
 }

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { useAuth } from '../_layout';
+import { useAuth } from '../../contexts/AuthContext';
 import Constants from 'expo-constants'; // Add this import
 
 export default function Settings() {
   const router = useRouter();
   const [username, setUsername] = useState('');
-  const { setUser } = useAuth();
+  const { signOut } = useAuth();
   
   // Get app version from app.json
   const appVersion = Constants.expoConfig?.version || 'Ôi zồi ôi!'; // Fallback version if not found
@@ -47,7 +47,7 @@ export default function Settings() {
               // Xóa các dữ liệu khác nếu cần
               // await AsyncStorage.multiRemove(['token', 'otherData']);
               // Update auth context
-              setUser(null);
+              signOut(null);
               // Chuyển hướng về trang đăng nhập
               router.replace('/login');
             } catch (error) {
@@ -69,34 +69,31 @@ export default function Settings() {
 
       <Text style={styles.sectionTitle}>Tài khoản</Text>
 
-      <TouchableOpacity
-        style={styles.settingItem}
-        onPress={() => router.push('/account-info')}
-      >
-        <FontAwesome name="user" size={20} color="#333" />
-        <Text style={styles.settingText}>Thông tin tài khoản</Text>
-        <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
-      </TouchableOpacity>
+      <Link href="/settings/account-info" asChild>
+        <TouchableOpacity style={styles.settingItem}>
+          <FontAwesome name="user" size={20} color="#333" />
+          <Text style={styles.settingText}>Thông tin tài khoản</Text>
+          <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
+        </TouchableOpacity>
+      </Link>
 
-      <TouchableOpacity
-        style={styles.settingItem}
-        onPress={() => router.push('/change-password')}
-      >
-        <FontAwesome name="lock" size={20} color="#333" />
-        <Text style={styles.settingText}>Đổi mật khẩu</Text>
-        <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
-      </TouchableOpacity>
+      <Link href="/settings/change-password" asChild>
+        <TouchableOpacity style={styles.settingItem}>
+          <FontAwesome name="lock" size={20} color="#333" />
+          <Text style={styles.settingText}>Đổi mật khẩu</Text>
+          <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
+        </TouchableOpacity>
+      </Link>
 
       <Text style={styles.sectionTitle}>Cài đặt chung</Text>
 
-      <TouchableOpacity
-        style={styles.settingItem}
-        onPress={() => router.push('/notifications')}
-      >
-        <FontAwesome name="bell" size={20} color="#333" />
-        <Text style={styles.settingText}>Thông báo</Text>
-        <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
-      </TouchableOpacity>
+      <Link href="/settings/notifications" asChild>
+        <TouchableOpacity style={styles.settingItem}>
+          <FontAwesome name="bell" size={20} color="#333" />
+          <Text style={styles.settingText}>Thông báo</Text>
+          <FontAwesome name="angle-right" size={20} color="#999" style={styles.chevron} />
+        </TouchableOpacity>
+      </Link>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <FontAwesome name="sign-out" size={20} color="#fff" />
