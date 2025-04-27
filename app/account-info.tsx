@@ -22,8 +22,15 @@ export default function AccountInfoScreen() {
     const getUserData = async () => {
       try {
         const data = await AsyncStorage.getItem('userData');
+        console.log('Raw AsyncStorage userData:', data);
+        
         if (data) {
-          setUserData(JSON.parse(data));
+          const parsedData = JSON.parse(data);
+          console.log('Parsed userData object:', parsedData);
+          console.log('userData properties:', Object.keys(parsedData));
+          setUserData(parsedData);
+        } else {
+          console.log('No userData found in AsyncStorage');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -35,6 +42,9 @@ export default function AccountInfoScreen() {
     getUserData();
   }, []);
 
+  // Add this before the conditional rendering to see userData right before rendering
+  console.log('Current userData state before rendering:', userData);
+  
   if (loading) {//
     return (
       <View style={[styles.container, styles.centered]}>
@@ -42,6 +52,18 @@ export default function AccountInfoScreen() {
       </View>
     );
   }
+
+  // Log specific fields we're trying to display
+  console.log('User Details:', {
+    name: userData?.ten_nv,
+    position: userData?.ten_chuc_vu,
+    employeeId: userData?.ma_nv,
+    email: userData?.email,
+    phone: userData?.phone,
+    department: userData?.department,
+    joinDate: userData?.join_date,
+    avatar: userData?.hinh_anh
+  });
 
   return (
     <ScrollView style={styles.container}>
@@ -55,10 +77,10 @@ export default function AccountInfoScreen() {
 
       <View style={styles.profileHeader}>
         <Image 
-          source={
-            userData?.avatar 
-              ? { uri: userData.avatar } 
-              : require('../assets/default-avatar.png')
+          source={           
+              userData?.hinh_anh 
+                ? { uri: `https://qlns.vhe.com.vn/uploads/staffs/${userData?.hinh_anh}` }
+                : require('../assets/default-avatar.png')
           }
           style={styles.avatar}
         />

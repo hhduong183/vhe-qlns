@@ -35,22 +35,36 @@ export default function LoginScreen() {
             if (result.success) {
                 // Lưu thông tin người dùng vào AsyncStorage
                 const userData = {
-                    id: result.id,
-                    ten_nv: result.ten_nv,
-                    // Thông tin khác nếu cần
+                    id: result.user_info.id,
+                    ten_nv: result.user_info.ten_nv,
+                    hinh_anh: result.user_info.hinh_anh,
+                    must_change_password: result.user_info.must_change_password,
+                    ngay_sinh: result.user_info.ngay_sinh || null, // Thêm ngày sinh vào user data
                 };
                 
                 await AsyncStorage.setItem('userData', JSON.stringify(userData));
                 
-                // IMPORTANT: Update the auth context user state
+                // Update the auth context user state
                 setUser(userData);
 
-                Alert.alert('Đăng nhập thành công', `Chào mừng, ${result.ten_nv}!`);
-                router.replace('/(tabs)');
+                Alert.alert(
+                    'Đăng nhập thành công', 
+                    `Chào mừng, ${result.user_info.ten_nv}!`,
+                    [
+                        { 
+                            text: 'OK', 
+                            onPress: () => {
+                                // Navigate after alert is dismissed
+                                router.replace('/(tabs)');
+                            }
+                        }
+                    ]
+                );
             } else {
                 Alert.alert('Đăng nhập thất bại', result.message || 'Thông tin đăng nhập không chính xác');
             }
         } catch (error) {
+            console.error('Login error:', error);
             Alert.alert('Lỗi', 'Không thể kết nối đến server. Vui lòng thử lại.');
         }
     };

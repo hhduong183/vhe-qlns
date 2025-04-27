@@ -156,7 +156,7 @@ export default function Profile() {
       <View style={styles.profileCard}>
         <View style={styles.profileImageContainer}>
           <Image 
-            source={{ uri: `https://test.vhe.com.vn/uploads/staffs/${employeeData.hinh_anh}` }} 
+            source={{ uri: `https://qlns.vhe.com.vn/uploads/staffs/${employeeData.hinh_anh}` }} 
             style={styles.profileImage}
             defaultSource={require('../../assets/default-avatar.png')}
           />
