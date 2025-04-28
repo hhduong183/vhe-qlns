@@ -646,6 +646,13 @@ const checkUserBirthday = useCallback(async () => {
             cacheKey="vhe_logo"
           />
         </View>
+                {/* Birthday Section */}
+                {userBirthday && (
+          <BirthdayCard
+            userBirthday={userBirthday}
+            isBirthdayToday={isBirthdayToday}
+          />
+        )}
         
         {/* Weather Section */}
         <View style={styles.weatherCard}>
@@ -664,13 +671,7 @@ const checkUserBirthday = useCallback(async () => {
           <Text>isBirthdayToday: {isBirthdayToday ? 'true' : 'false'}</Text>
         </View> */}
 
-        {/* Birthday Section */}
-        {userBirthday && (
-          <BirthdayCard
-            userBirthday={userBirthday}
-            isBirthdayToday={isBirthdayToday}
-          />
-        )}
+
 
         {/* Website News Section */}
         <View style={styles.newsSection}>

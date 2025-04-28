@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  ActivityIndicator, 
-  Image, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Image,
   TouchableOpacity,
-  Alert 
+  Alert
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -42,11 +42,11 @@ export default function AccountInfoScreen() {
           setUserData(parsedData);
         } else {
           Alert.alert(
-            'Thông báo', 
+            'Thông báo',
             'Không tìm thấy dữ liệu người dùng. Vui lòng đăng nhập lại.',
             [
               {
-                text: 'OK', 
+                text: 'OK',
                 onPress: () => {
                   // Add a short delay before navigation
                   setTimeout(() => {
@@ -64,13 +64,22 @@ export default function AccountInfoScreen() {
         setLoading(false);
       }
     };
-    
+
     loadUserData();
   }, [router]);
 
   // Return to settings screen
   const handleBack = () => {
-    router.back();
+    try {
+      // Try explicit navigation to settings instead of relying on history
+      router.replace('/settings');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback approach
+      setTimeout(() => {
+        router.push('/settings');
+      }, 100);
+    }
   };
 
   // Navigate to change password screen
@@ -102,8 +111,8 @@ export default function AccountInfoScreen() {
 
       {/* Profile photo and name section */}
       <View style={styles.profileHeader}>
-        <Image 
-          source={userData?.hinh_anh 
+        <Image
+          source={userData?.hinh_anh
             ? { uri: `https://qlns.vhe.com.vn/uploads/staffs/${userData.hinh_anh}` }
             : require('../../assets/default-avatar.png')
           }
@@ -117,47 +126,43 @@ export default function AccountInfoScreen() {
       {/* Personal information section */}
       <View style={styles.infoSection}>
         <Text style={styles.sectionTitle}>Thông tin cá nhân</Text>
-        
-        <InfoItem 
-          icon="id-card" 
-          label="Mã nhân viên" 
-          value={userData?.ma_nv} 
-        />
-        
-        <InfoItem 
-          icon="envelope" 
-          label="Email" 
-          value={userData?.email} 
-        />
-        
-        <InfoItem 
-          icon="phone" 
-          label="Số điện thoại" 
-          value={userData?.phone} 
-        />
-        
-        <InfoItem 
-          icon="building" 
-          label="Phòng ban" 
-          value={userData?.department} 
-        />
-        
-        <InfoItem 
-          icon="calendar" 
-          label="Ngày vào công ty" 
-          value={userData?.join_date} 
+
+        <InfoItem icon="id-card" label="Mã nhân viên" value={userData?.ma_nv} />
+
+        <InfoItem
+          icon="envelope"
+          label="Email"
+          value={userData?.email}
         />
 
-        <InfoItem 
-          icon="birthday-cake" 
-          label="Ngày sinh" 
+        <InfoItem
+          icon="phone"
+          label="Số điện thoại"
+          value={userData?.phone}
+        />
+
+        <InfoItem
+          icon="building"
+          label="Phòng ban"
+          value={userData?.department}
+        />
+
+        <InfoItem
+          icon="calendar"
+          label="Ngày vào công ty"
+          value={userData?.join_date}
+        />
+
+        <InfoItem
+          icon="birthday-cake"
+          label="Ngày sinh"
           value={userData?.ngay_sinh}
         />
       </View>
 
       {/* Actions section */}
       <View style={styles.actionsSection}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.actionButton}
           onPress={handleChangePassword}
         >
