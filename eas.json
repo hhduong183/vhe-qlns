@@ -28,14 +28,20 @@
       },
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release",
+        "distribution": "internal"
       }
+
     },
     "production": {
       "autoIncrement": true,
       "channel": "production",
       "env": {
         "APP_ENV": "production",
-        "API_URL": "https://vhe.com.vn/api"
+        "API_URL": "https://test.vhe.com.vn/api"
       },
       "android": {
         "buildType": "apk"

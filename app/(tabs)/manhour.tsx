@@ -165,7 +165,7 @@ export default function ManhourEntry() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    // <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Nhập giờ công</Text>
@@ -282,7 +282,7 @@ export default function ManhourEntry() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 }
 

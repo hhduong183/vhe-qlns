@@ -14,7 +14,8 @@
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       },
       "supportsTablet": true
     },
@@ -24,7 +25,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.hhduong183.vheqlns",
-      "versionCode": 4
+      "versionCode": 5
     },
     "web": {
       "bundler": "metro",

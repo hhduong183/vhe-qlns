@@ -1,239 +1,224 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  ActivityIndicator,
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
-  const { returnTo } = useLocalSearchParams();
-  const [currentPassword, setCurrentPassword] = useState('');
+  const { forced } = useLocalSearchParams();
+  const { signOut } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Force password change mode if 'forced' parameter is present
+  const isForced = forced === 'true';
+
+  // Prevent going back if this is a forced password change
+  useEffect(() => {
+    if (isForced) {
+      // Implement this logic if needed to prevent hardware back navigation
+      // This depends on your navigation setup
+    }
+  }, [isForced]);
+
+  const handleBack = () => {
+    if (isForced) {
+      Alert.alert(
+        'Yêu cầu đổi mật khẩu',
+        'Bạn cần phải đổi mật khẩu trước khi tiếp tục sử dụng ứng dụng.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    router.back();
+  };
 
   const handleChangePassword = async () => {
-    // Validate inputs
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+    // Remove the console log in production code
+    // console.log(oldPassword, newPassword, confirmPassword);
+    console.log(oldPassword, newPassword, confirmPassword);
+
+    // Check fields individually - this is sufficient without the combined check
+    if (!oldPassword) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu hiện tại.');
+      return;
+    }
+    
+    if (!newPassword) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới.');
+      return;
+    }
+    
+    if (!confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng xác nhận mật khẩu mới.');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Lỗi', 'Mật khẩu mới không khớp');
+      Alert.alert('Lỗi', 'Mật khẩu mới và xác nhận mật khẩu không khớp.');
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert('Lỗi', 'Mật khẩu mới phải có ít nhất 6 ký tự');
+      Alert.alert('Lỗi', 'Mật khẩu mới phải có ít nhất 6 ký tự.');
       return;
     }
 
     setLoading(true);
-
     try {
-      // Get user ID from storage
-      const userData = await AsyncStorage.getItem('userData');
-      if (!userData) {
-        Alert.alert('Lỗi', 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.');
-        router.replace('/login');
-        return;
+      // Get user info
+      const userDataString = await AsyncStorage.getItem('userData');
+      const token = await AsyncStorage.getItem('authToken');
+      
+      if (!userDataString || !token) {
+        throw new Error('Không tìm thấy thông tin người dùng');
       }
 
-      const userDataObj = JSON.parse(userData);
-      const userId = userDataObj.id;
-
-      // // TEMPORARY: Use a mock response instead of the actual API
-      // console.log('Using mock response while API is being fixed');
+      const userData = JSON.parse(userDataString);
       
-      // // Simulate network delay
-      // await new Promise(resolve => setTimeout(resolve, 1000));
+      // Log request body for debugging
+      const requestBody = {
+        user_id: userData.id,
+        current_password: oldPassword,
+        new_password: newPassword
+      };
+      console.log('Request body:', requestBody);
       
-      // // Simulate successful response (you can modify for testing error scenarios)
-      // const mockSuccess = true;
-      
-      // if (mockSuccess) {
-      //   Alert.alert('Thành công', ' client Mật khẩu đã được thay đổi', [
-      //     { text: 'OK', onPress: () => router.back() }
-      //   ]);
-      // } else {
-      //   Alert.alert('Lỗi', 'Mật khẩu hiện tại không đúng');
-      // }
-      
-      // /* COMMENTED OUT: Original API call code
-      const authToken = await AsyncStorage.getItem('authToken');
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
+      // Call API to change password
       const response = await fetch('https://test.vhe.com.vn/api/change_password.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          user_id: userId,
-          current_password: currentPassword,
-          new_password: newPassword,
-        }),
-        signal: controller.signal
+        body: JSON.stringify(requestBody)
       });
       
-      clearTimeout(timeoutId);
+      // Check response status and log it
+      console.log('Response status:', response.status);
       
+      // Get response text first to check what we're receiving
       const responseText = await response.text();
-      console.log('Raw response:', responseText.substring(0, 200));
+      console.log('Raw response:', responseText);
       
+      // Only try to parse as JSON if there's content
       let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        Alert.alert('Lỗi', 'Máy chủ trả về dữ liệu không hợp lệ. Vui lòng thử lại sau.');
-        setLoading(false);
-        return;
+      if (responseText) {
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('JSON Parse error:', parseError);
+          throw new Error('Server response is not valid JSON');
+        }
+      } else {
+        throw new Error('Server returned empty response');
       }
       
       if (result && result.success) {
-        Alert.alert('Thành công', 'Mật khẩu đã được thay đổi', [
-          { text: 'OK', onPress: () => router.back() }
-        ]);
+        Alert.alert(
+          'Thành công',
+          'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.',
+          [
+            {
+              text: 'OK',
+              onPress: async () => {
+                // Sign out and redirect to login
+                await signOut();
+                router.replace('/login');
+              }
+            }
+          ]
+        );
       } else {
-        Alert.alert('Lỗi', result.message || 'Đổi mật khẩu không thành công');
+        Alert.alert('Lỗi', (result && result.message) || 'Đổi mật khẩu thất bại.');
       }
-      // */
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('Request timed out');
-        Alert.alert('Lỗi', 'Yêu cầu đã hết thời gian. Vui lòng kiểm tra kết nối mạng và thử lại.');
-      } else {
-        console.error('Lỗi khi đổi mật khẩu:', error);
-        Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
-      }
+      console.error('Change password error:', error);
+      Alert.alert('Lỗi', error.message || 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBack = () => {
-    // Để Stack Navigator quản lý việc back
-    router.back();
-  };
-
   return (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }} 
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <FontAwesome name="arrow-left" size={20} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Đổi mật khẩu</Text>
-          <View style={{ width: 20 }} />
-        </View>
+    <View style={styles.container}>
+      {/* Header with back button (disabled if forced change) */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <FontAwesome name="arrow-left" size={20} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Đổi mật khẩu</Text>
+        <View style={{ width: 20 }} />
+      </View>
 
-        <View style={styles.form}>
-          <Text style={styles.label}>Mật khẩu hiện tại</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập mật khẩu hiện tại"
-              secureTextEntry={!showCurrentPassword}
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-              style={styles.eyeIcon}
-            >
-              <FontAwesome 
-                name={showCurrentPassword ? "eye-slash" : "eye"} 
-                size={20} 
-                color="#999" 
-              />
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.label}>Mật khẩu mới</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập mật khẩu mới"
-              secureTextEntry={!showNewPassword}
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowNewPassword(!showNewPassword)}
-              style={styles.eyeIcon}
-            >
-              <FontAwesome 
-                name={showNewPassword ? "eye-slash" : "eye"} 
-                size={20} 
-                color="#999" 
-              />
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.label}>Xác nhận mật khẩu mới</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nhập lại mật khẩu mới"
-              secureTextEntry={!showConfirmPassword}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={styles.eyeIcon}
-            >
-              <FontAwesome 
-                name={showConfirmPassword ? "eye-slash" : "eye"} 
-                size={20} 
-                color="#999" 
-              />
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.submitButton} 
-            onPress={handleChangePassword}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.submitButtonText}>Đổi mật khẩu</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.noticeContainer}>
-          <FontAwesome name="info-circle" size={20} color="#3c8dbc" style={styles.infoIcon} />
-          <Text style={styles.noticeText}>
-            Mật khẩu mới phải có ít nhất 6 ký tự. Khuyến khích sử dụng kết hợp chữ cái, số và ký tự đặc biệt để tăng tính bảo mật.
+      {isForced && (
+        <View style={styles.warningBanner}>
+          <FontAwesome name="exclamation-triangle" size={18} color="#ff9800" />
+          <Text style={styles.warningText}>
+            Bạn cần đổi mật khẩu trước khi tiếp tục sử dụng ứng dụng
           </Text>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      )}
+
+      <View style={styles.formContainer}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Mật khẩu hiện tại</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập mật khẩu hiện tại"
+            secureTextEntry
+            value={oldPassword}
+            onChangeText={setOldPassword}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Mật khẩu mới</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập mật khẩu mới"
+            secureTextEntry
+            value={newPassword}
+            onChangeText={setNewPassword}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Xác nhận mật khẩu mới</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nhập lại mật khẩu mới"
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.button}
+          onPress={handleChangePassword}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Đổi mật khẩu</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
@@ -246,80 +231,73 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: 'white',
+    borderBottomColor: '#e1e1e1',
   },
   backButton: {
-    padding: 5,
+    padding: 8,
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
-  form: {
-    padding: 20,
-    backgroundColor: 'white',
-    margin: 15,
+  warningBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff8e1',
+    padding: 12,
+    marginVertical: 12,
+    marginHorizontal: 16,
     borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff9800',
+  },
+  warningText: {
+    marginLeft: 10,
+    color: '#795548',
+    flex: 1,
+  },
+  formContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    margin: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 2,
     elevation: 2,
+  },
+  inputGroup: {
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
-    marginBottom: 15,
+    marginBottom: 6,
   },
   input: {
-    flex: 1,
-    padding: 12,
-    fontSize: 16,
-  },
-  eyeIcon: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
     padding: 10,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
   },
-  submitButton: {
+  button: {
     backgroundColor: '#3c8dbc',
-    padding: 15,
-    borderRadius: 5,
+    borderRadius: 4,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 8,
   },
-  submitButtonText: {
-    color: 'white',
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '500',
-  },
-  noticeContainer: {
-    flexDirection: 'row',
-    padding: 15,
-    backgroundColor: '#e1f5fe',
-    borderRadius: 8,
-    marginHorizontal: 15,
-    marginTop: 10,
-  },
-  infoIcon: {
-    marginRight: 10,
-  },
-  noticeText: {
-    flex: 1,
-    color: '#555',
-    fontSize: 14,
-    lineHeight: 20,
   },
 });

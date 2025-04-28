@@ -627,7 +627,7 @@ const checkUserBirthday = useCallback(async () => {
 
   // Main render
   return (
-    <SafeAreaView style={styles.container}>
+    // <SafeAreaView style={styles.container}>
       <ScrollView 
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -653,7 +653,7 @@ const checkUserBirthday = useCallback(async () => {
             isBirthdayToday={isBirthdayToday}
           />
         )}
-        
+
         {/* Weather Section */}
         <View style={styles.weatherCard}>
           <Text style={styles.sectionTitle}>Thời tiết Hải Phòng</Text>
@@ -726,7 +726,7 @@ const checkUserBirthday = useCallback(async () => {
         </View>
 
       </ScrollView>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 }
 

@@ -57,16 +57,33 @@ export default function LoginScreen() {
         // Use the signIn function instead of setUser
         await signIn(userData, result.token || ''); // Pass the token if it exists
         
-        // Di chuyển router.replace ra khỏi Alert
-        setTimeout(() => {
-          router.replace('/(tabs)');
-        }, 100);
-        
-        // Hiện thông báo sau khi đã bắt đầu chuyển trang
-        Alert.alert(
-          'Đăng nhập thành công', 
-          `Chào mừng, ${result.user_info.ten_nv}!`
-        );
+        // Check if user must change password
+        if (result.user_info.must_change_password === 1) {
+          Alert.alert(
+            'Yêu cầu đổi mật khẩu',
+            'Bạn cần đổi mật khẩu trước khi tiếp tục sử dụng ứng dụng.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  // Navigate to password change screen with forced flag
+                  router.replace('/settings/change-password?forced=true');
+                }
+              }
+            ]
+          );
+        } else {
+          // Normal login flow
+          setTimeout(() => {
+            router.replace('/(tabs)');
+          }, 100);
+          
+          // Hiện thông báo sau khi đã bắt đầu chuyển trang
+          Alert.alert(
+            'Đăng nhập thành công', 
+            `Chào mừng, ${result.user_info.ten_nv}!`
+          );
+        }
       } else {
         Alert.alert('Đăng nhập thất bại', result.message || 'Thông tin đăng nhập không chính xác');
       }
