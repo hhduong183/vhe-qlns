@@ -44,7 +44,7 @@
         "API_URL": "https://test.vhe.com.vn/api"
       },
       "android": {
-        "buildType": "apk"
+        "buildType": "app-bundle"
       }
     }
   },

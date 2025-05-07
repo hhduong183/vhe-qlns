@@ -27,7 +27,6 @@ export async function checkAppVersion(): Promise<VersionCheckResponse> {
     const response = await fetch(
       `https://test.vhe.com.vn/api/version_check.php?platform=${Platform.OS}&version=${currentVersion}&app_id=${bundleId}`
     );
-    
     const result = await response.json();
     
     console.log('Version check result:', result);
